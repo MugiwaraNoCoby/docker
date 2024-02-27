@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get update && apt-get install -y pip python3
 RUN pip install pyspark pyarrow
 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64/
+
 
 RUN curl -O https://dist.apache.org/repos/dist/release/hadoop/common/KEYS
 
