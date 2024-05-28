@@ -1,27 +1,28 @@
+# Gebruik de nieuwste versie van Ubuntu als basis
 FROM ubuntu:latest
 
+# Maintainers
 MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
 MAINTAINER Giannis Mouchakis <gmouchakis@iit.demokritos.gr>
 
+# Installeer vereiste pakketten
 RUN apt-get update && apt-get install -y \
-      openjdk-8-jdk \
-      net-tools \
-      curl \
-      netcat \
-      gnupg \
-      libsnappy-dev \
+    openjdk-8-jdk \
+    net-tools \
+    curl \
+    netcat-openbsd \
+    gnupg \
+    libsnappy-dev \
+    python3-pip \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/*
-	
-# Install python
-RUN apt-get update && apt-get install -y pip python3
-RUN pip install pyspark pyarrow
 
+# Stel de JAVA_HOME omgeving variabele in
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64/
 
-
-RUN curl -O https://dist.apache.org/repos/dist/release/hadoop/common/KEYS
-
-RUN gpg --import KEYS
+# Download en installeer Hadoop
+RUN curl -O https://dist.apache.org/repos/dist/release/hadoop/common/KEYS \
+    && gpg --import KEYS
 
 ENV HADOOP_VERSION 3.3.6
 ENV HADOOP_URL https://dist.apache.org/repos/dist/release/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
@@ -33,20 +34,28 @@ RUN set -x \
     && tar -xvf /tmp/hadoop.tar.gz -C /opt/ \
     && rm /tmp/hadoop.tar.gz*
 
-RUN ln -s /opt/hadoop-$HADOOP_VERSION/etc/hadoop /etc/hadoop
+# Maak symbolische links en directories aan
+RUN ln -s /opt/hadoop-$HADOOP_VERSION/etc/hadoop /etc/hadoop \
+    && mkdir /opt/hadoop-$HADOOP_VERSION/logs \
+    && mkdir /hadoop-data
 
-RUN mkdir /opt/hadoop-$HADOOP_VERSION/logs
-
-RUN mkdir /hadoop-data
-
+# Stel Hadoop omgeving variabelen in
 ENV HADOOP_HOME=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV MULTIHOMED_NETWORK=1
 ENV USER=root
 ENV PATH $HADOOP_HOME/bin/:$PATH
 
-ADD entrypoint.sh /entrypoint.sh
+# Maak een Python virtuele omgeving aan en installeer vereiste Python pakketten
+RUN python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --upgrade pip \
+    && /opt/venv/bin/pip install pyspark pyarrow setuptools mrjob
 
+# Zet de virtuele omgeving in de PATH variabele
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Voeg het entrypoint script toe
+ADD entrypoint.sh /entrypoint.sh
 RUN chmod a+x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
