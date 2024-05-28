@@ -23,7 +23,6 @@ services:
       - 9999:8888
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-      - /Users/jacobyk/documents/Big_Data:/home/bigdata
       # TODO: Voeg hier extra folders toe om ze zichtbaar te maken in je containers, deze hebben de volgende structuur:
       # {local absolute path}:/home/bigdata/{folderstructuur waar je ze wil hebben}
     environment:
