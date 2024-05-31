@@ -1,5 +1,5 @@
 # Gebruik de nieuwste versie van Ubuntu als basis
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # Maintainers
 MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
@@ -49,7 +49,7 @@ ENV PATH $HADOOP_HOME/bin/:$PATH
 # Maak een Python virtuele omgeving aan en installeer vereiste Python pakketten
 RUN python3 -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install pyspark pyarrow setuptools mrjob
+    && /opt/venv/bin/pip install pyspark pyarrow setuptools mrjob numpy
 
 # Zet de virtuele omgeving in de PATH variabele
 ENV PATH="/opt/venv/bin:$PATH"
